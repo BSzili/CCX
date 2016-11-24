@@ -16,9 +16,10 @@
 #include <cstdlib>
 #endif
 
-#if defined(__APPLE__)
+#include <limits.h>
+char candyCrisisResources[PATH_MAX];
 
-static char candyCrisisResources[PATH_MAX];
+#if defined(__APPLE__)
 
 // This is required in order to access the app bundle's resources.
 // resourcesURL ends up containing a Posix format path to the resources folder.
@@ -89,7 +90,7 @@ MBoolean PICTExists( int pictID )
 	{
 		// SDL_Image > 1.2.7 error triage.
 //		printf("Oh My Goodness, an error : %s\n", IMG_GetError());
-		printf("Resource %s not found\n", QuickResourceName( "PICT", pictID, ".jpg/.png" ));
+		DebugPrintf("Resource %s not found\n", QuickResourceName( "PICT", pictID, ".jpg/.png" ));
 		return false;
 	}
 }

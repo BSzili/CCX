@@ -3,7 +3,7 @@
 void LoadPrefs( void );
 void SavePrefs( void );
 
-#ifdef __APPLE__ && newprefs
+#if defined __APPLE__ && defined newprefs
 SDLKey ASCII_SDLKey(int value);
 void LoadPrefsMac();
 void SavePrefsMac();

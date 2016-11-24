@@ -13,6 +13,8 @@
 
 #include "main.h" // for Error
 
+// save the bugger
+MBoolean     fullscreenMode = true;
 
 // for acquiresurface
 const int           k_acquireMax = 10;
@@ -528,7 +530,6 @@ SDL_Surface* SDLU_InitSurface( SDL_Rect* rect, int depth )
 	
 	if( surface == NULL )
 	{
-		printf("SDLU_InitSurface: SDL_CreateRGBSurface");
 		Error( "SDLU_InitSurface: SDL_CreateRGBSurface" );
 		return NULL;
 	}
@@ -612,6 +613,19 @@ int SDLU_EventFilter( const SDL_Event *event )
 			finished = true;
 		}
 		
+		if(    (event->key.keysym.sym == SDLK_RETURN)
+		    && (event->key.keysym.mod & (KMOD_LALT | KMOD_RALT)) )
+		{
+			extern SDL_Surface* frontSurface;
+			SDL_WM_ToggleFullScreen(frontSurface);
+			fullscreenMode = ((frontSurface->flags & SDL_FULLSCREEN) == SDL_FULLSCREEN);
+			/* This should take care of all the bugs... */
+			SDL_WarpMouse(320, 240);
+			EnableMusic(!musicOn);
+			EnableMusic(!musicOn);
+			DoFullRepaint();
+		}
+		
 		return 0;
 	}
 	
@@ -657,10 +671,12 @@ int SDLU_EventFilter( const SDL_Event *event )
 		{
 			FreezeGameTickCount();
 			EnableMusic(false);
+			SDL_WM_GrabInput( SDL_GRAB_OFF );
             s_isForeground = false;
 		}
 		else if( event->active.gain && !s_isForeground )
 		{
+			SDL_WM_GrabInput( SDL_GRAB_ON );
 			UnfreezeGameTickCount();
 			EnableMusic(musicOn);
             s_isForeground = true;

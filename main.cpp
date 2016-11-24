@@ -71,20 +71,34 @@ Uint16* redGamma;
 Uint16* greenGamma;
 Uint16* blueGamma;
 
+#ifdef __AROS__
+static MBoolean startedfromwb = false;
+#endif
+
 int main(int argc, char *argv[])
 {
+#ifdef __AROS__
+	startedfromwb = (argc == 0);
+#endif
 	// Initialize the SDL library
 	// This is required to avoid _main errors at runtime.
 #ifdef UseSDLMixer
 	if ( SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0 ) {
 #else
 	if ( SDL_Init(SDL_INIT_VIDEO ) < 0 ) {
-#endif		
+#endif
+#ifdef __AROS__
+		char errmsg[256];
+		snprintf(errmsg, sizeof(errmsg), "Couldn't initialize SDL: %s\n", SDL_GetError());
+		Error(errmsg);
+#else
 		fprintf(stderr, "Couldn't initialize SDL: %s\n",
 				SDL_GetError());
 		exit(1);
+#endif
 	}
 
+#if !defined __AROS__ && !defined __MORPHOS__
 	// Init SDL_Image - only applies above 1.2.7
 	// load support for the JPG and PNG image formats
 	int IMGflags=IMG_INIT_JPG|IMG_INIT_PNG;
@@ -94,13 +108,19 @@ int main(int argc, char *argv[])
 		printf("IMG_Init: %s\n", IMG_GetError());
 		// handle error
 	}
-
+#endif
 		
 #ifdef UseSDLMixer
 	// Initialize SDL mixer.
 	if(Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 1024) != 0) {
+#ifdef __AROS__
+		char errmsg[256];
+		snprintf(errmsg, sizeof(errmsg), "Unable to initialize audio: %s\n", Mix_GetError());
+		Error(errmsg);
+#else
 		fprintf(stderr, "Unable to initialize audio: %s\n", Mix_GetError());
 		exit(1);
+#endif
 	}
 #endif
     
@@ -216,6 +236,12 @@ void RefreshAll( void )
 	ShowScore( 1 );
 }
 
+#if defined __AROS__ || defined __MORPHOS__
+#include <proto/exec.h>
+/*#include <proto/dos.h>*/
+#include <proto/intuition.h>
+#endif
+
 void Error( const char* extra )
 {
 #if TARGET_API_MAC_CARBON
@@ -232,11 +258,40 @@ void Error( const char* extra )
 	sprintf( message, "Sorry, a critical error has occurred. Please report the following error message:\n    %s", extra );
 	#if WIN32
 		MessageBox( NULL, message, "Candy Crisis", MB_OK );
-	#else
-		fprintf(stderr, "Candy Crisis: %s\n", message);
+	#elif defined __AROS__ || defined __MORPHOS__
+	if (startedfromwb)
+	{
+		struct EasyStruct es;
+		
+		es.es_StructSize = sizeof(es);
+		es.es_Flags = 0;
+		es.es_Title = "Candy Crisis";
+		es.es_TextFormat = message;
+		es.es_GadgetFormat = "Okay :(";
+
+		EasyRequest(0, &es, 0, 0);
+	}
+	else
 	#endif
+		fprintf(stderr, "Candy Crisis: %s\n", message);
+
 	exit(0);
 #endif
+}
+
+void DebugPrintf(const char *message, ...)
+{
+    va_list arglist;
+    char errstr[256];
+	
+    va_start(arglist, message);
+
+#ifdef __AROS__
+	if (!startedfromwb)
+#endif
+		vfprintf(stderr, message, arglist);
+	
+    va_end(arglist);
 }
 
 void WaitForRelease( void )
@@ -296,7 +351,8 @@ MBoolean OptionKeyIsPressed( void )
 
 void RetrieveResources( void )
 {
-	                            OpeningProgress( 0, 10 );
+								OpeningProgress( 0, 10 );
+
 	InitSound( );				OpeningProgress( 1, 10 );
 
 	InitBackdrop( );			OpeningProgress( 2, 10 );
@@ -341,6 +397,7 @@ void CenterRectOnScreen( MRect *rect, double locationX, double locationY )
 
 void ReserveMonitor( void )
 {
+	Uint32 flags = SDL_SWSURFACE;
 	
 #if TARGET_API_MAC_CARBON
 #else
@@ -356,7 +413,11 @@ void ReserveMonitor( void )
 #endif
 	SDL_ShowCursor( SDL_DISABLE );
 	
-	frontSurface = SDL_SetVideoMode( 640, 480, 24, SDL_SWSURFACE | SDL_FULLSCREEN );
+	if (fullscreenMode)
+		flags |= SDL_FULLSCREEN;
+		
+	frontSurface = SDL_SetVideoMode( 640, 480, 24, flags );
+	SDL_WM_GrabInput( SDL_GRAB_ON );
 
 	SDL_WM_SetCaption( "Candy Crisis", "CandyCrisis" );
 }
@@ -395,6 +456,9 @@ void Initialize( void )
 #endif
 #ifdef linux
 		strcpy( candyCrisisResources, "CandyCrisisResources/" );
+#endif
+#if defined __AROS__ || defined __MORPHOS__
+		strcpy( candyCrisisResources, "CandyCrisisResources" );
 #endif		
 #endif
 	atexit( SDL_Quit );
@@ -460,8 +524,8 @@ void WaitForRegainFocus()
 
 void LaunchURL( const char* url )
 {
-#ifdef __linux__
-	printf("URL: %s\n", url);
+#if defined __linux__ || defined __AROS__ || defined __MORPHOS__
+	DebugPrintf("URL: %s\n", url);
 #else
 #if TARGET_API_MAC_CARBON
 	OSStatus err = -1;

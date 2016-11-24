@@ -26,6 +26,7 @@ void NoPaint();
 void NeedRefresh();
 void WaitForRegainFocus();
 void LaunchURL( const char* url );
+void DebugPrintf(const char *message, ...);
 
 #define flashyAnimation true
 

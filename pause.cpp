@@ -785,7 +785,7 @@ static MBoolean HiScoreSelected( int *item, unsigned char inKey, SDLKey inSDLKey
 		
 	nameLength = strlen(highScoreName);
 	
-	printf("HiScoreSelected entered\n");
+	//printf("HiScoreSelected entered\n");
 
 	switch (inSDLKey) {
 		case SDLK_RETURN: // return key

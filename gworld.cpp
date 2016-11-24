@@ -45,18 +45,18 @@ void GetBlobGraphics()
 
 	// Embedded comments to triage SDL_Image > 1.2.7 breakage
 	blobSurface = LoadPICTAsSurface( picBlob, 16 );
-	printf("blob : %s\n", IMG_GetError());
+	DebugPrintf("blob : %s\n", IMG_GetError());
 	maskSurface = LoadPICTAsSurface( picBlobMask, 1 );
-	printf("mask : %s\n", IMG_GetError());
+	DebugPrintf("mask : %s\n", IMG_GetError());
 	charMaskSurface = LoadPICTAsSurface( picCharMask, 1 );
-	printf("charmask : %s\n", IMG_GetError());
+	DebugPrintf("charmask : %s\n", IMG_GetError());
 
 	// Get blast worlds
 	
 	blastSurface = LoadPICTAsSurface( picBlast, 16 );
-	printf("Blast : %s\n", IMG_GetError());
+	DebugPrintf("Blast : %s\n", IMG_GetError());
 	blastMaskSurface = LoadPICTAsSurface( picBlastMask, 16 );
-	printf("BlastMask : %s\n", IMG_GetError());
+	DebugPrintf("BlastMask : %s\n", IMG_GetError());
 }
 
 
@@ -195,7 +195,7 @@ SDL_Surface* LoadPICTAsSurface( int pictID, int depth )
 		else
 		{
 			// Fail
-			printf("Oh My Goodness, an error : %d, %s\n", pictID, IMG_GetError());
+			DebugPrintf("Oh My Goodness, an error : %d, %s\n", pictID, IMG_GetError());
 			return NULL;
 		}
 	}

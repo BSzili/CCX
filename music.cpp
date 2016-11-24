@@ -130,7 +130,7 @@ void ChooseMusic( short which )
 		{
 			Mix_VolumeMusic(musicOn? 128: 0);
 			if(Mix_PlayMusic(musicModule, -1)==-1) {
-				printf("Mix_PlayMusic: %s\n", Mix_GetError());
+				DebugPrintf("Mix_PlayMusic: %s\n", Mix_GetError());
 			}
 			musicSelection = which;
 			musicLevel = 0;

@@ -18,14 +18,16 @@
 #include "resources.h"
 #endif
 
-#ifdef __APPLE__ && newprefs
 #include "main.h"
-#include "prefs.h"
 #include "music.h"
 #include "soundfx.h"
 #include "hiscore.h"
 #include "keyselect.h"
 #include "level.h"
+#include "prefs.h"
+#include "SDLU.h"
+
+#if defined __APPLE__ && newprefs
 
 // CoreFoundation will provide the .plist support
 #include <CoreFoundation/CoreFoundation.h>
@@ -606,8 +608,9 @@ PrefList prefList[] = {
 	/*		{ 'size', registeredKey,               sizeof( registeredKey  ) },*/
 	{ 'keys', playerKeys,                  sizeof( playerKeys     ) },
 	{ 'high', scores,                      sizeof( scores         ) },
-	{ 'cmbx', &best,                       sizeof( best           ) }/*,
-																	  { 'user', registeredName,              sizeof( registeredName ) }*/
+	{ 'cmbx', &best,                       sizeof( best           ) },
+	/*{ 'user', registeredName,              sizeof( registeredName ) }*/
+	{ 'fscr', &fullscreenMode,             sizeof( fullscreenMode ) }
 };
 
 #define kPrefListSize (sizeof(prefList)/sizeof(prefList[0]))
@@ -617,7 +620,7 @@ PrefList prefList[] = {
 
 void LoadPrefs( void )
 {	
-#ifdef newprefs && __APPLE__
+#if defined newprefs && defined __APPLE__
 	LoadPrefsMac();
 #else
 	FILE *F;
@@ -669,6 +672,8 @@ unsigned char* FindPrefsLine( unsigned char *prefsText, long prefsLength, long s
 {
 	unsigned char *prefsAt, *check, *endCheck;
 	
+	DebugPrintf("FindPrefsLine ... %d %d %d\n", prefsLength, searchCode, dataQuantity);
+	
 	for( prefsAt = prefsText; prefsAt < (prefsText+prefsLength-3); prefsAt++ )
 	{
 		if( (prefsAt[0] == ((searchCode >> 24) & 0xFF)) &&
@@ -713,7 +718,7 @@ unsigned char* FindPrefsLine( unsigned char *prefsText, long prefsLength, long s
 
 void SavePrefs( void )
 {
-#ifdef newprefs && __APPLE__
+#if defined newprefs && defined __APPLE__
 	SavePrefsMac();
 #else
 	FILE *F;
@@ -737,6 +742,7 @@ void SavePrefs( void )
 				fprintf( F, "%02X", *dataAt );
 				dataAt++;
 			}
+			
 			
 			fputc( '\n', F );
 		}

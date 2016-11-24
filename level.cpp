@@ -697,7 +697,7 @@ void PrepareStageGraphics( int type )
 	
 	backgroundID = type * 100;
 	
-    printf("PrepareStageGraphics: %d", picBoard + backgroundID);
+    //printf("PrepareStageGraphics: %d\n", picBoard + backgroundID);
 	DrawPICTInSurface( boardSurface[0], picBoard + backgroundID );	
 	
 	// NOTE: Many levels have no right-side board, so we copy the left
@@ -708,9 +708,9 @@ void PrepareStageGraphics( int type )
 	                  boardSurface[1], &boardSurface[1]->clip_rect  );
 	
     if (PICTExists(picBoardRight)) {
-        printf("Thought this existed: %d", picBoardRight);
+        //printf("Thought this existed: %d\n", picBoardRight);
         DrawPICTInSurface( boardSurface[1], picBoardRight + backgroundID );
-        printf("PrepareStageGraphics: %d", picBoardRight + backgroundID);
+        //printf("PrepareStageGraphics: %d\n", picBoardRight + backgroundID);
     }
     
 	DrawPICTInSurface( backdropSurface, picBackdrop + backgroundID );
